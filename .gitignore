@@ -1,0 +1,10 @@
+# created by virtualenv automatically
+bin
+lib
+venv
+.vscode
+__pycache__/
+redis_play.py
+models/
+base_menu.py
+include/

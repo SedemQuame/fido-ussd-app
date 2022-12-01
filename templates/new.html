@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <!-- CSS only -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet"
+        integrity="sha384-1BmE4kWBq78iYhFldvKuhfTAU6auU8tT94WrHftjDbrCEXSU1oBoqyl2QvZ6jIW3" crossorigin="anonymous">
+</head>
+
+<body>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="/">Fido Credit USSD Dashboard</a>
+
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNavAltMarkup"
+                aria-controls="navbarNavAltMarkup" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNavAltMarkup">
+                <div class="navbar-nav">
+                    <a class="nav-link" href="{{ url_for('show_all') }}">Clients</a>
+                    <a class="nav-link" href="{{ url_for('new') }}">Create clients</a>
+                    <a class="nav-link" href="{{ url_for('show_logs') }}">Callback Logs</a>
+                    <a class="nav-link" href="{{ url_for('new_log') }}">Create Logs</a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <div class="col-12 offset-md-1 col-md-10">
+
+        <div class="col-12 offset-md-4 col-md-4">
+
+            <p>Please enter the user's details to register them for the ussd </p>
+
+            {%- for category, message in get_flashed_messages(with_categories = true) %}
+            <div class="alert alert-danger">
+                {{ message }}
+            </div>
+            {%- endfor %}
+
+            <form action="{{ request.path }}" method="post">
+
+                <b>Personal Details</b>
+                <hr>
+
+                <div class="mb-3">
+                    <label for="name" class="form-label">Name</label>
+                    <input id="name" class="form-control" type="text" name="name" placeholder="Name" />
+                </div>
+
+                <div class="mb-3">
+                    <label for="phone" class="form-label">Phone Number</label>
+                    <input id="phone" class="form-control" type="text" name="phone" placeholder="Phone Number" />
+                </div>
+
+                <div class="mb-3">
+                    <label for="email_address" class="form-label">Email Address</label>
+                    <input id="email_address" class="form-control" type="text" name="email_address"
+                        placeholder="Email Address" />
+                </div>
+
+                <div class="mb-3">
+                    <label for="PIN" class="form-label">PIN</label>
+                    <input id="PIN" class="form-control" type="number" name="pin" placeholder="Pin" min="1000"
+                        max="9999" />
+                </div>
+
+                <div class="d-grid gap-2 d-md-block">
+                    <input class="btn btn-dark" type="submit" value="Submit" />
+                </div>
+
+                <br>
+                <br>
+                <br>
+            </form>
+        </div>
+    </div>
+
+</body>
+
+</html>
