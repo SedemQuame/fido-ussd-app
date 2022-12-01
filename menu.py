@@ -34,10 +34,11 @@ A class to represent a USSD menu.
 """
 
 
-import smtplib
 import string
 import random
+import os
 from datetime import datetime
+from twilio.rest import Client
 
 # global
 GLOBAL_SENDER = "sedem.amekpewu.3@gmail.com"
@@ -68,7 +69,7 @@ class Menu():
 
     def home(self, _id):
         """serves the home menu"""
-        phase_str = 'CON Main Menu \n'
+        phase_str = 'Main Menu \n'
         phase_str += '1. Get OTP\n'
         phase_str += '2. Check Balance\n'
         phase_str += '3. Request for a callback\n'
@@ -85,29 +86,26 @@ class Menu():
 
     # --------------------------------------------------------------
 
-    def mail_random_string_to_(self, sender, receiver, password, intent):
-        """Function for sending emails"""
-        mail_content = f"""
-            You are receiving this email because there was a {intent} for you AFROUSSD account.
-        """
-        receiver = ", ".join(receiver)
-        email_text = f"""
-            From: {sender}
-            To: {receiver}
-            Subject: {intent}
-            {mail_content}
+    def send_sms(self, phone_number, intent):
+        """Function for sending sms, using Twilio Trial API."""
+        sms_content = f"""
+        \n
+        FIDO CREDIT USSD
+        \n
+        You are receiving this SMS because you {intent},\n
         """
 
-        try:
-            server = smtplib.SMTP('smtp.gmail.com', 587)
-            server.ehlo()
-            server.starttls()
-            server.login(sender, password)
-            server.sendmail(sender, ", ".join(receiver), email_text)
-            server.quit()
-            print('Email sent!')
-        except Exception as exception:
-            print(exception)
+        account_sid = os.environ['TWILIO_ACCOUNT_SID']
+        auth_token = os.environ['TWILIO_AUTH_TOKEN']
+        client = Client(account_sid, auth_token)
+
+        message = client.messages.create(
+            body=sms_content,
+            from_='+19498280706',
+            to=phone_number
+        )
+
+        print(message.sid)
 
     def check_balance_sequence(self, text, _id, clients, phone_number):
         """USSD sequence to allow client's check their account's balance."""
@@ -140,12 +138,12 @@ class Menu():
             text,
             logs,
             _db,
-            sender_phone_number):
+            phone_number):
         """USSD sequence to allow user's request a callback."""
         phase_str = ''
         if len(text.split('*')) == 1:
             log = logs(
-                phone=sender_phone_number,
+                phone=phone_number,
                 timestamp=datetime.now().strftime('%d/%m/%y %H:%M:%S.%f'),
                 request_type="Request Callback")
 
@@ -155,9 +153,10 @@ class Menu():
             phase_str += 'Request Callback\n'
             phase_str += 'Record was successfully added\n'
             phase_str += 'You will get a callback soon.\n'
+            intent = "requested a callback."
 
-            # send sms/email functionality will be implemented here.
-            # self.mail_random_string_to_(sender, receiver, password, intent)
+            # send sms functionality
+            self.send_sms(phone_number, intent)
 
         else:
             phase_str = "Unknown input, please try again"

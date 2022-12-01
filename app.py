@@ -140,25 +140,25 @@ def ussd_callback():
 
     _id = request.values.get("sessionId", None)
     service_code = request.values.get("serviceCode", None)
-    phone_number = sanitize(request.values.get("phoneNumber", None))
+    phone_number = request.values.get("phoneNumber", None)
     text = request.values.get("text", '')
 
     print(_id, service_code, phone_number, text)
 
     if text == '':
         return menu.home(_id)
-    elif text == '1':
+    # ----------------------------------------
+    if text == '1':
         return menu.generate_otp()
     # ----------------------------------------
-    elif text[0] == '2' or '2*' == text[0:2]:
+    if text[0] == '2' or '2*' == text[0:2]:
         return menu.check_balance_sequence(text, _id, Clients, phone_number)
     # ----------------------------------------
-    elif text[0] == '3':
+    if text[0] == '3':
         return menu.request_callback_sequence(text, Logs, db, phone_number)
     # ----------------------------------------
-    else:
-        # return menu.unavailable()
-        return "END"
+    # return menu.unavailable()
+    return "END"
 
 
 # creating application port.
