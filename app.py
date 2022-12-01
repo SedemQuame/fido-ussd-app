@@ -1,10 +1,14 @@
+"""
+A class to represent a USSD API and accompanying dashboard.
+"""
+
 import os
 import pprint
 from datetime import datetime
-from flask import Flask, make_response, request, flash, url_for, redirect, render_template
-from flask_sqlalchemy import SQLAlchemy
 from session_manager import SessionManager
 from menu import Menu
+from flask import Flask, make_response, request, flash, url_for, redirect, render_template
+from flask_sqlalchemy import SQLAlchemy
 
 
 app = Flask(__name__)
@@ -79,7 +83,7 @@ def new():
             email=request.form['email_address'],
             balance="0.0",
             pin=request.form['pin'],
-            creation_date=datetime.now().strftime('%d/%m/%y'))
+            creation_date=datetime.now().strftime('%d/%m/%y %H:%M:%S.%f'))
         db.session.add(client)
         db.session.commit()
         flash('Record was successfully added')
@@ -94,7 +98,7 @@ def new_log():
     if request.method == 'POST':
 
         log = Logs(
-            timestamp=datetime.now().strftime('%d/%m/%y'),
+            timestamp=datetime.now().strftime('%d/%m/%y %H:%M:%S.%f'),
             phone=sanitize(request.form['phone']),
             request_type="Request Callback")
 
@@ -147,9 +151,9 @@ def ussd_callback():
         return menu.generate_otp()
     # ----------------------------------------
     elif text[0] == '2' or '2*' == text[0:2]:
-        return menu.check_balance_sequence(text, _id, Clients, db, phone_number)
+        return menu.check_balance_sequence(text, _id, Clients, phone_number)
     # ----------------------------------------
-    elif text[0] == '3' or '3*' == text[0:2]:
+    elif text[0] == '3':
         return menu.request_callback_sequence(text, Logs, db, phone_number)
     # ----------------------------------------
     else:

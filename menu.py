@@ -18,7 +18,7 @@ A class to represent a USSD menu.
     mail_random_string_to_(self, sender, receiver, password, intent, phone_number):
         Function for sending emails
 
-    check_balance_sequence(self, text, _id, accounts, db, sender_phone_number):
+    check_balance_sequence(self, text, _id, clients, db, sender_phone_number):
         USSD sequence to allow client's check their account's balance.
 
     request_callback_sequence(
@@ -37,7 +37,7 @@ A class to represent a USSD menu.
 import smtplib
 import string
 import random
-from flask import make_response
+from datetime import datetime
 
 # global
 GLOBAL_SENDER = "sedem.amekpewu.3@gmail.com"
@@ -72,9 +72,6 @@ class Menu():
         phase_str += '1. Get OTP\n'
         phase_str += '2. Check Balance\n'
         phase_str += '3. Request for a callback\n'
-        print(phase_str)
-        response = make_response(phase_str, 200)
-        response.headers['Content-Type'] = "text/plain"
         return self.session.ussd_proceed(phase_str, _id, '1')
 
     # --------------------------------------------------------------
@@ -112,27 +109,30 @@ class Menu():
         except Exception as exception:
             print(exception)
 
-    def check_balance_sequence(self, text, _id, accounts, db, sender_phone_number):
+    def check_balance_sequence(self, text, _id, clients, phone_number):
         """USSD sequence to allow client's check their account's balance."""
         phase_str = ''
-        sender_account = accounts.query.filter_by(
-            phone=sender_phone_number).all()
+        sender_account = clients.query.filter_by(
+            phone=phone_number).all()
 
-        if len(text.split('*')) == 0:
+        if len(text.split('*')) == 1:
             phase_str += "Check Balance\n"
             phase_str += "Please enter your client id.\n"
             return self.session.ussd_proceed(phase_str, _id, '')
 
-        if len(text.split('*')) == 1:
-            input_id = text.split('*')[1]
+        if len(text.split('*')) == 2:
+            input_id = text.split('*')[1]  # this input is the user's input_id
+
             # a valid client id must be greater than length 6
-            if len(input_id) > 8:
+            if str(sender_account[0].id) == str(input_id):
                 phase_str += "Account Balance\n"
                 phase_str += f"Your current account balance is: {sender_account[0].balance}\n"
             else:
                 phase_str += "Account Balance\n"
                 phase_str += f"The input id {input_id} is invalid.\n"
             return self.session.ussd_end(phase_str)
+
+        return None
     # --------------------------------------------------------------
 
     def request_callback_sequence(
@@ -143,10 +143,10 @@ class Menu():
             sender_phone_number):
         """USSD sequence to allow user's request a callback."""
         phase_str = ''
-        if len(text.split('*')) == 2:
+        if len(text.split('*')) == 1:
             log = logs(
                 phone=sender_phone_number,
-                timestamp="",
+                timestamp=datetime.now().strftime('%d/%m/%y %H:%M:%S.%f'),
                 request_type="Request Callback")
 
             _db.session.add(log)
