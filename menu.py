@@ -81,7 +81,7 @@ class Menu():
         """Generates and sends and OTP to the user's session"""
         generated_otp = self.random_otp_generator()
         phase_str = "Generate OTP \n"
-        phase_str += f"Please you generated otp is: {generated_otp}\n"
+        phase_str += f"Please your generated otp is: {generated_otp}\n"
         return self.session.ussd_end(phase_str)
 
     # --------------------------------------------------------------
@@ -120,9 +120,12 @@ class Menu():
 
         if len(text.split('*')) == 2:
             input_id = text.split('*')[1]  # this input is the user's input_id
+            print(f"Input id: {input_id}")
+            if len(sender_account) > 0:
+                print(f"Send account id id: {sender_account[0].id}")
 
             # a valid client id must be greater than length 6
-            if str(sender_account[0].id) == str(input_id):
+            if len(sender_account) > 0 and str(sender_account[0].id) == str(input_id):
                 phase_str += "Account Balance\n"
                 phase_str += f"Your current account balance is: {sender_account[0].balance}\n"
             else:
@@ -141,25 +144,22 @@ class Menu():
             phone_number):
         """USSD sequence to allow user's request a callback."""
         phase_str = ''
-        if len(text.split('*')) == 1:
-            log = logs(
-                phone=phone_number,
-                timestamp=datetime.now().strftime('%d/%m/%y %H:%M:%S.%f'),
-                request_type="Request Callback")
+        log = logs(
+            phone=phone_number,
+            timestamp=datetime.now().strftime('%d/%m/%y %H:%M:%S.%f'),
+            request_type="Request Callback")
 
-            _db.session.add(log)
-            _db.session.commit()
+        _db.session.add(log)
+        _db.session.commit()
 
-            phase_str += 'Request Callback\n'
-            phase_str += 'Record was successfully added\n'
-            phase_str += 'You will get a callback soon.\n'
-            intent = "requested a callback."
+        phase_str += 'Request Callback\n'
+        phase_str += 'Record was successfully added\n'
+        phase_str += 'You will get a callback soon.\n'
+        intent = "requested a callback."
 
-            # send sms functionality
-            self.send_sms(phone_number, intent)
+        # send sms functionality
+        self.send_sms(phone_number, intent)
 
-        else:
-            phase_str = "Unknown input, please try again"
         return self.session.ussd_end(phase_str)
     # --------------------------------------------------------------
 

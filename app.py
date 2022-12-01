@@ -165,4 +165,5 @@ def ussd_callback():
 if __name__ == '__main__':
     # run application on localhost, using port stored as PORT in env variables.
     db.create_all()
-    app.run(host="0.0.0.0", port=os.environ.get('PORT'), debug=True)
+    # app.run(host="0.0.0.0", port=os.environ.get('PORT'), debug=True)
+    app.run(host="0.0.0.0", port=7000, debug=True)
